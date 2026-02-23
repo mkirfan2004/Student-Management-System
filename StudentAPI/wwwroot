@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Management System</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            color: white;
+        }
+
+        .container {
+            background: white;
+            color: black;
+            width: 350px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        input {
+            width: 90%;
+            padding: 8px;
+            margin: 8px 0;
+        }
+
+        button {
+            padding: 8px 15px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #dashboard {
+            width: 600px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+
+        a {
+            cursor: pointer;
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Student Management System</h1>
+
+<!-- LOGIN -->
+<div class="container" id="loginBox">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p>Don't have account? <a onclick="showRegister()">Sign Up</a></p>
+</div>
+
+<!-- REGISTER -->
+<div class="container" id="registerBox">
+    <h2>Register</h2>
+    <input type="text" id="regName" placeholder="Full Name">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPassword" placeholder="Password">
+    <button onclick="register()">Register</button>
+    <p>Already have account? <a onclick="showLogin()">Login</a></p>
+</div>
+
+<!-- DASHBOARD -->
+<div class="container" id="dashboard">
+    <h2>Dashboard</h2>
+
+    <input type="text" id="sName" placeholder="Student Name">
+    <input type="email" id="sEmail" placeholder="Student Email">
+    <input type="text" id="sCourse" placeholder="Course">
+    <button onclick="addStudent()">Add Student</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Course</th>
+            </tr>
+        </thead>
+        <tbody id="studentList"></tbody>
+    </table>
+
+    <br>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+
+    // ✅ UPDATED PORT
+    const API = "https://localhost:44377/api/";
+
+    function showLogin() {
+        document.getElementById("loginBox").style.display = "block";
+        document.getElementById("registerBox").style.display = "none";
+        document.getElementById("dashboard").style.display = "none";
+    }
+
+    function showRegister() {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("registerBox").style.display = "block";
+        document.getElementById("dashboard").style.display = "none";
+    }
+
+    function showDashboard() {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("registerBox").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        loadStudents();
+    }
+
+    async function register() {
+        try {
+            const response = await fetch(API + "auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    fullName: document.getElementById("regName").value,
+                    email: document.getElementById("regEmail").value,
+                    password: document.getElementById("regPassword").value
+                })
+            });
+
+            const result = await response.text();
+            alert(result);
+            showLogin();
+        }
+        catch (error) {
+            alert("Registration Error");
+            console.error(error);
+        }
+    }
+
+    async function login() {
+        try {
+            const response = await fetch(API + "auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: document.getElementById("loginEmail").value,
+                    password: document.getElementById("loginPassword").value
+                })
+            });
+
+            if (response.ok) {
+                alert("Login Successful");
+                showDashboard();
+            } else {
+                alert("Invalid Login");
+            }
+        }
+        catch (error) {
+            alert("Login Error");
+            console.error(error);
+        }
+    }
+
+    async function addStudent() {
+        try {
+            await fetch(API + "students", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: document.getElementById("sName").value,
+                    email: document.getElementById("sEmail").value,
+                    course: document.getElementById("sCourse").value
+                })
+            });
+
+            loadStudents();
+        }
+        catch (error) {
+            alert("Error Adding Student");
+            console.error(error);
+        }
+    }
+
+    async function loadStudents() {
+        try {
+            const response = await fetch(API + "students");
+            const data = await response.json();
+
+            let rows = "";
+            data.forEach(s => {
+                rows += `<tr>
+                            <td>${s.name}</td>
+                            <td>${s.email}</td>
+                            <td>${s.course}</td>
+                         </tr>`;
+            });
+
+            document.getElementById("studentList").innerHTML = rows;
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    function logout() {
+        showLogin();
+    }
+
+    showLogin();
+
+</script>
+
+</body>
+</html>
