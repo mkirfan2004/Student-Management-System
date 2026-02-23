@@ -20,3 +20,4 @@ This is an ASP.NET Core Web API project for managing student records.
 2. Open in Visual Studio or VS Code
 3. Run: dotnet run
 4. Open: https://localhost:xxxx/swagger
+5. Open: file:///C:/Users/acer/Downloads/intex.html
